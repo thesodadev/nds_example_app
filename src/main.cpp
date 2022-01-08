@@ -1,4 +1,4 @@
-#include <nds.h>
+#include <nds/nds.h>
 
 /*
 * This example was picked from https://github.com/devkitPro/nds-examples

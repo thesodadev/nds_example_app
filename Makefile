@@ -1,6 +1,5 @@
-CXX		= arm-none-eabi-g++
-LD		= arm-none-eabi-g++
-NDSTOOL = ndstool
+CXX	 = arm-none-eabi-g++
+LD = arm-none-eabi-g++
 
 APP_NAME = example
 BUILD_DIR = build
@@ -8,41 +7,35 @@ BUILD_DIR = build
 SRC_DIR = src
 SRC_FILES = main.cpp
 
-LIB_DIRS = 	-L$(NDSCRT_DIR) \
-			-L$(LIBNDS_DIR) \
-			-L$(NEWLIB_DIR)/arm-none-eabi/thumb/newlib/thumb \
-			-L$(NEWLIB_DIR)/arm-none-eabi/thumb/libgloss/libsysbase
-
-LIBS = -lnds -lc -lm -lg -lsysbase
-
-INCLUDE_DIRS = 	-I $(LIBNDS_DIR)/include \
-				-I $(NEWLIB_DIR)/newlib/libc/include
+LIBS = -lnds9 -lm -lg -lsysbase -lc -lgcc -nodefaultlibs
 
 ARCH := -mthumb -mthumb-interwork
 
-CFLAGS := -Wall -Wno-reorder -O0 \
-		-march=armv5te \
-		-mtune=arm946e-s \
-		-fomit-frame-pointer \
-		-ffast-math \
-		$(ARCH) \
-		$(INCLUDE_DIRS) \
-		-DARM9
+CXXFLAGS := -DARM9 \
+		    -Wall -Wno-reorder -O0 \
+		    -march=armv5te \
+		    -mtune=arm946e-s \
+		    -fomit-frame-pointer \
+		    -ffast-math \
+		    -fno-rtti \
+		    -fno-exceptions \
+		    $(ARCH)
 
-CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
-LDFLAGS	= -B$(NDSCRT_DIR) -specs=$(NDSCRT_DIR)/arm9.specs $(ARCH)
+LDFLAGS	= -specs=arm9.specs \
+		  -mcpu=arm946e-s \
+		  $(ARCH) 
 
-NDSTOOL_TITLE = $(APP_NAME)
-NDSTOOL_SUBTITLE1 = subtitle1
-NDSTOOL_SUBTITLE2 = subtitle2
-NDSTOOL_ICON = res/icon.bmp
+NDS_TITLE = $(APP_NAME)
+NDS_SUBTITLE1 = subtitle1
+NDS_SUBTITLE2 = subtitle2
+NDS_ICON = res/icon.bmp
 
 # remove file extension -> instead append ".o" -> add to build path
 SRC_OBJ_FILES = $(patsubst %,$(BUILD_DIR)/%,$(addsuffix .o,$(basename $(SRC_FILES))))
 BIN_PATH = $(BUILD_DIR)/$(APP_NAME)
 
 $(BIN_PATH).nds: $(BIN_PATH).elf
-	$(NDSTOOL) -c $@ -9 $< -b $(NDSTOOL_ICON) "$(NDSTOOL_TITLE);$(NDSTOOL_SUBTITLE1);$(NDSTOOL_SUBTITLE2)"
+	ndstool -c $@ -7 /opt/nds/arm7_default.elf -9 $< -b $(NDS_ICON) "$(NDS_TITLE);$(NDS_SUBTITLE1);$(NDS_SUBTITLE2)"
 
 $(BIN_PATH).elf: $(SRC_OBJ_FILES)
 	$(LD) $(LDFLAGS) $^ $(LIB_DIRS) $(LIBS) -o $@
